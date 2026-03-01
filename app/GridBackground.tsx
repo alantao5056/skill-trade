@@ -64,7 +64,7 @@ export default function GridBackground({ className, children }: GridBackgroundPr
         <div className="absolute left-[-10%] bottom-[-20%] w-[40%] h-[40%] rounded-full bg-blue-500/40 blur-[120px]" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center w-full flex-1">
+      <div className="relative z-10 flex flex-col items-center justify-center w-full flex-1 min-h-screen">
         {children}
       </div>
     </div>

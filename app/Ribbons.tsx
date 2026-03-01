@@ -123,10 +123,15 @@ const Ribbons: React.FC<RibbonsProps> = ({
       if (!container) return;
       const width = container.clientWidth;
       const height = container.clientHeight;
-      renderer.setSize(width, height);
-      lines.forEach(line => line.polyline.resize());
+      if (width > 0 && height > 0) {
+        renderer.setSize(width, height);
+        lines.forEach(line => line.polyline.resize());
+      }
     }
     window.addEventListener('resize', resize);
+    const resizeObserver = new ResizeObserver(() => resize());
+    resizeObserver.observe(container);
+    requestAnimationFrame(() => requestAnimationFrame(resize));
 
     const center = (colors.length - 1) / 2;
     colors.forEach((color, index) => {
@@ -232,6 +237,7 @@ const Ribbons: React.FC<RibbonsProps> = ({
     update();
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', resize);
       container.removeEventListener('mousemove', updateMouse);
       container.removeEventListener('touchstart', updateMouse);

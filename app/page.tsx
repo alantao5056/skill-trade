@@ -1,7 +1,9 @@
+"use client";
+
 import RotatingText from './RotatingText';
 import SignInButton from './SignInButton';
 import GridBackground from './GridBackground';
-import Ribbons from './Ribbons';
+import RibbonsWrapper from './RibbonsWrapper';
 import ClickSpark from './ClickSpark';
 import RedirectIfSignedIn from './RedirectIfSignedIn';
 
@@ -10,6 +12,16 @@ export default function Home() {
     <RedirectIfSignedIn>
     <main className="font-sans min-h-screen relative">
       <div className="fixed inset-0 w-full h-full">
+        <div className="absolute inset-0 z-0 w-full h-full min-h-screen ribbons-container">
+          <RibbonsWrapper
+            baseThickness={20}
+            colors={["#5227FF", "#feecca"]}
+            speedMultiplier={0.5}
+            maxAge={500}
+            enableFade={false}
+            enableShaderEffect={false}
+          />
+        </div>
         <ClickSpark
           sparkColor="#000000"
           sparkSize={10}
@@ -18,16 +30,6 @@ export default function Home() {
           duration={400}
         >
           <GridBackground>
-            <div className="ribbons-container absolute inset-0 z-[1]">
-              <Ribbons
-                baseThickness={20}
-                colors={["#5227FF", "#feecca"]}
-                speedMultiplier={0.5}
-                maxAge={500}
-                enableFade={false}
-                enableShaderEffect={false}
-              />
-            </div>
           <div className="relative z-20 flex flex-col items-center justify-center gap-4 pointer-events-none">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold">Trade</h1>
@@ -46,13 +48,13 @@ export default function Home() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold">.</h1>
             </div>
             <p className="text-gray-600 text-lg max-w-md text-center">
-              Description here.
+              Pay with knowledge, not money, a peer-to-peer platform for a community of skill exchangers.
             </p>
             <div className="pointer-events-auto">
               <SignInButton />
             </div>
           </div>
-        </GridBackground>
+          </GridBackground>
         </ClickSpark>
       </div>
     </main>
