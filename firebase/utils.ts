@@ -5,6 +5,18 @@ import { Edge } from '@/models/Edge';
 import { Res } from '@/models/Res';
 import { Cycle } from '@/models/Cycle';
 import { User } from '@/models/User';
+import { Task } from '@/models/Task';
+
+export async function getSkill(skillId: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const skillRef = doc(db, 'skills', skillId);
+    const skill = await getDoc(skillRef);
+    return { ok: true, data: skill.data() as Skill, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to get skill" };
+  }
+}
 
 export async function getSkills(): Promise<Res> {
   const db = getFirestore(app);
@@ -97,10 +109,12 @@ export async function getUserCycles(userId: string): Promise<Res> {
   const db = getFirestore(app);
   try {
     const cyclesRef = collection(db, 'cycles');
-    const cycles = await getDocs(query(cyclesRef, where('uid', '==', userId)));
+    const cycles = await getDocs(
+      query(cyclesRef, where('uids', 'array-contains', userId))
+    );
     const res: Res = {
       ok: true,
-      data: cycles.docs.map((doc) => doc.data() as Cycle),
+      data: cycles.docs.map((d) => ({ ...d.data(), cycleId: d.id }) as Cycle),
       error: "",
     };
     return res;
@@ -111,6 +125,51 @@ export async function getUserCycles(userId: string): Promise<Res> {
       error: "Failed to get user cycles",
     };
     return res;
+  }
+}
+
+export async function approveCycle(cycleId: string, uid: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const cycleRef = doc(db, 'cycles', cycleId);
+    const cycleSnap = await getDoc(cycleRef);
+    if (!cycleSnap.exists()) {
+      return { ok: false, data: null, error: "Cycle not found" };
+    }
+    const cycle = cycleSnap.data() as Cycle;
+    const updatedApprovals = cycle.approvals.map((a) =>
+      a.uid === uid ? { ...a, approved: true } : a
+    );
+    await updateDoc(cycleRef, { approvals: updatedApprovals });
+    return {
+      ok: true,
+      data: { ...cycle, cycleId, approvals: updatedApprovals } as Cycle,
+      error: "",
+    };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to approve cycle" };
+  }
+}
+
+export async function enqueueAddEdge(from: string, to: string, uid: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const task: Task = { type: "add", from, to, uid, edgeId: "", createdAt: Date.now() };
+    await addDoc(collection(db, 'queue'), task);
+    return { ok: true, data: null, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to enqueue add edge" };
+  }
+}
+
+export async function enqueueRemoveEdge(edgeId: string, uid: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const task: Task = { type: "remove", from: "", to: "", uid, edgeId, createdAt: Date.now() };
+    await addDoc(collection(db, 'queue'), task);
+    return { ok: true, data: null, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to enqueue remove edge" };
   }
 }
 
