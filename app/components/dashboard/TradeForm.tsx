@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getSkills } from "@/firebase/utils";
 import type { Skill } from "@/models/Skill";
+import { IoAdd } from "react-icons/io5";
 
 interface TradeFormProps {
   give: string;
@@ -85,8 +86,8 @@ export default function TradeForm({
         </select>
       </label>
 
-      <button type="submit" className="btn-primary text-sm">
-        Add trade
+      <button type="submit" className="btn-primary text-sm p-2 rounded-lg" aria-label="Add trade">
+      <IoAdd size={20} />
       </button>
     </form>
   );

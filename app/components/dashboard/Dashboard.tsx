@@ -8,6 +8,7 @@ import {
   enqueueRemoveEdge,
   getUserCycles,
   approveCycle,
+  rejectCycle,
   getSkills,
   getUser,
 } from "@/firebase/utils";
@@ -116,13 +117,23 @@ export default function Dashboard() {
     }
   };
 
+  const handleRejectCycle = async (cycleId: string) => {
+    if (!user) return;
+    const res = await rejectCycle(cycleId, user.uid);
+    if (res.ok) {
+      setCycles((prev) =>
+        prev.map((c) => (c.cycleId === cycleId ? (res.data as Cycle) : c))
+      );
+    }
+  };
+
   return (
     <main className="font-sans h-screen w-full flex flex-col overflow-hidden">
       <div className="dashboard-bento grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0 w-full">
         {/* Left: Trades */}
         <section className="flex flex-col h-full min-h-0 p-6 border-r border-[rgba(13,148,136,0.15)] bg-transparent">
-          <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-4">Trades</h2>
-          <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-4">Trades</h2>
+        <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden bg-white">
             <TradeForm
               give={give}
               want={want}
@@ -141,8 +152,8 @@ export default function Dashboard() {
 
         {/* Right: Cycles */}
         <section className="flex flex-col h-full min-h-0 p-6 bg-transparent">
-          <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-4">Cycles</h2>
-          <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-4">Cycles</h2>
+        <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col flex-1 min-h-0 overflow-hidden bg-white">
             <p className="text-[var(--color-text)]/70 text-sm mb-3 shrink-0">
               Matches with other users&apos; trade requests.
             </p>
@@ -153,6 +164,7 @@ export default function Dashboard() {
               skillMap={skillMap}
               userMap={userMap}
               onAccept={handleAcceptCycle}
+              onReject={handleRejectCycle}
             />
           </div>
         </section>

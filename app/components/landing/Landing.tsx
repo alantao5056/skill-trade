@@ -1,3 +1,4 @@
+import Image from "next/image";
 import RotatingText from "@/app/components/ui/RotatingText";
 import SignInButton from "@/app/components/auth/SignInButton";
 import GridBackground from "@/app/components/ui/GridBackground";
@@ -27,11 +28,21 @@ export default function Landing() {
               />
             </div>
           <div className="relative z-20 flex flex-col items-center justify-center gap-4 pointer-events-none">
+            <div className="flex items-center gap-3 mb-2">
+              <Image
+                src="/logo.png"
+                alt="SkillTrade"
+                width={56}
+                height={56}
+                className="shrink-0"
+              />
+              <span className="text-3xl sm:text-4xl font-bold text-[var(--color-text)]">SkillTrade</span>
+            </div>
             <div className="flex items-center gap-4">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold">Trade</h1>
               <RotatingText
-                texts={['code', 'math', 'music', '<your skill here>']}
-                mainClassName="inline-flex px-4 sm:px-5 md:px-6 bg-teal-600 text-black overflow-hidden py-2 sm:py-3 md:py-4 justify-center rounded-lg text-4xl sm:text-5xl md:text-6xl font-semibold w-max"
+                texts={['code', 'math', 'music', 'art', 'basketball', '<your skill here>']}
+                mainClassName="inline-flex px-4 sm:px-5 md:px-6 bg-blue-500 text-black overflow-hidden py-2 sm:py-3 md:py-4 justify-center rounded-lg text-4xl sm:text-5xl md:text-6xl font-semibold w-max"
                 staggerFrom="last"
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
@@ -44,7 +55,8 @@ export default function Landing() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold">.</h1>
             </div>
             <p className="text-gray-600 text-lg max-w-md text-center">
-              Description here.
+            Pay with knowledge, not money, on a peer-to-peer platform building a community of skill exchangers.
+
             </p>
             <div className="pointer-events-auto">
               <SignInButton />
