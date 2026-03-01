@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { VscHome, VscAccount } from "react-icons/vsc";
 import { MdMeetingRoom } from "react-icons/md";
-import Dock from "./Dock";
+import Dock from "@/app/components/ui/Dock";
 
 export default function NavBar() {
   const router = useRouter();

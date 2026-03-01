@@ -6,6 +6,7 @@ import { Res } from '@/models/Res';
 import { Cycle } from '@/models/Cycle';
 import { User } from '@/models/User';
 import { Task } from '@/models/Task';
+import { Meeting } from '@/models/Meeting';
 
 export async function getSkill(skillId: string): Promise<Res> {
   const db = getFirestore(app);
@@ -141,11 +142,30 @@ export async function approveCycle(cycleId: string, uid: string): Promise<Res> {
       a.uid === uid ? { ...a, approved: true } : a
     );
     await updateDoc(cycleRef, { approvals: updatedApprovals });
-    return {
-      ok: true,
-      data: { ...cycle, cycleId, approvals: updatedApprovals } as Cycle,
-      error: "",
-    };
+
+    const updatedCycle = { ...cycle, cycleId, approvals: updatedApprovals } as Cycle;
+    const allApproved = updatedApprovals.every((a) => a.approved);
+
+    if (allApproved) {
+      await createMeetingsFromCycle(updatedCycle);
+
+      for (const edgeId of updatedCycle.edgeIds) {
+        const edgeSnap = await getDoc(doc(db, 'edges', edgeId));
+        if (edgeSnap.exists()) {
+          const edge = edgeSnap.data() as Edge;
+          await enqueueRemoveEdge(edgeId, edge.uid);
+        }
+      }
+
+      const uniqueUids = [...new Set(updatedCycle.uids)];
+      for (const cycleUid of uniqueUids) {
+        await updateDoc(doc(db, "users", cycleUid), { cycles: arrayRemove(cycleId) });
+      }
+
+      await deleteDoc(cycleRef);
+    }
+
+    return { ok: true, data: updatedCycle, error: "" };
   } catch (err) {
     return { ok: false, data: null, error: "Failed to approve cycle" };
   }
@@ -186,6 +206,7 @@ export async function ensureUserDocument(
       displayName: displayName ?? uid,
       cycles: [],
       edges: [],
+      meetings: [],
       offer: {},
       need: {},
     };
@@ -218,5 +239,90 @@ export async function updateUserProfile(
     return { ok: true, data: null, error: "" };
   } catch (err) {
     return { ok: false, data: null, error: "Failed to update user profile" };
+  }
+}
+
+export async function createMeetingsFromCycle(cycle: Cycle): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const meetingsRef = collection(db, 'meetings');
+    const n = cycle.uids.length;
+    const meetingIds: string[] = [];
+
+    // uids[i] gives skillIds[i] to uids[(i+1) % n]
+    for (let i = 0; i < n; i++) {
+      const giveUid = cycle.uids[i];
+      const wantUid = cycle.uids[(i + 1) % n];
+      const skillId = cycle.skillIds[i];
+
+      const docRef = await addDoc(meetingsRef, { giveUid, wantUid, skillId });
+      await updateDoc(doc(meetingsRef, docRef.id), { meetingId: docRef.id });
+      meetingIds.push(docRef.id);
+    }
+
+    const userMeetingMap = new Map<string, string[]>();
+    for (let i = 0; i < n; i++) {
+      const giveUid = cycle.uids[i];
+      const wantUid = cycle.uids[(i + 1) % n];
+      const mId = meetingIds[i];
+
+      if (!userMeetingMap.has(giveUid)) userMeetingMap.set(giveUid, []);
+      if (!userMeetingMap.has(wantUid)) userMeetingMap.set(wantUid, []);
+      userMeetingMap.get(giveUid)!.push(mId);
+      userMeetingMap.get(wantUid)!.push(mId);
+    }
+
+    for (const [uid, mIds] of userMeetingMap) {
+      await updateDoc(doc(db, "users", uid), { meetings: arrayUnion(...mIds) });
+    }
+
+    return { ok: true, data: meetingIds, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to create meetings from cycle" };
+  }
+}
+
+export async function getUserMeetings(userId: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const userRes = await getUser(userId);
+    if (!userRes.ok) return userRes;
+    const user = userRes.data as User;
+    const meetingIds = user.meetings ?? [];
+
+    if (meetingIds.length === 0) {
+      return { ok: true, data: [], error: "" };
+    }
+
+    const meetings = await Promise.all(
+      meetingIds.map(async (id: string) => {
+        const snap = await getDoc(doc(db, 'meetings', id));
+        return snap.exists() ? (snap.data() as Meeting) : null;
+      })
+    );
+
+    return { ok: true, data: meetings.filter(Boolean), error: "" };
+  } catch (err) {
+    return { ok: false, data: [], error: "Failed to get user meetings" };
+  }
+}
+
+export async function dismissMeeting(meetingId: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const meetingRef = doc(db, 'meetings', meetingId);
+    const meetingSnap = await getDoc(meetingRef);
+    if (!meetingSnap.exists()) {
+      return { ok: false, data: null, error: "Meeting not found" };
+    }
+    const meeting = meetingSnap.data() as Meeting;
+
+    await deleteDoc(meetingRef);
+    await updateDoc(doc(db, "users", meeting.giveUid), { meetings: arrayRemove(meetingId) });
+    await updateDoc(doc(db, "users", meeting.wantUid), { meetings: arrayRemove(meetingId) });
+
+    return { ok: true, data: null, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to dismiss meeting" };
   }
 }

@@ -3,6 +3,7 @@ export interface User {
   displayName?: string;
   cycles: string[];
   edges: string[];
+  meetings: string[];
   offer: Record<string, number>;
   need: Record<string, number>;
 }

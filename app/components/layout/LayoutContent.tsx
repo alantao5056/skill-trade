@@ -1,20 +1,19 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Aurora from "@/app/Aurora";
+import { useUser } from "@/context/UserContext";
+import Aurora from "@/app/components/ui/Aurora";
 
 export default function LayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const hasDock = pathname !== "/";
-  const showAurora = pathname !== "/";
+  const { user, loading } = useUser();
+  const isLoggedIn = !loading && !!user;
 
   return (
-    <div className={hasDock ? "pb-28" : ""}>
-      {showAurora && (
+    <div className={isLoggedIn ? "pb-28" : ""}>
+      {isLoggedIn && (
         <div
           className="fixed inset-0 overflow-hidden pointer-events-none -z-10"
           aria-hidden

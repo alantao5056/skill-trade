@@ -14,11 +14,11 @@ import {
 import type { Edge } from "@/models/Edge";
 import type { Cycle } from "@/models/Cycle";
 import type { Skill } from "@/models/Skill";
-import TradeForm from "./components/TradeForm";
-import TradeList from "./components/TradeList";
-import CycleList from "./components/CycleList";
+import TradeForm from "./TradeForm";
+import TradeList from "./TradeList";
+import CycleList from "./CycleList";
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const { user } = useUser();
 
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -103,9 +103,16 @@ export default function DashboardPage() {
     if (!user) return;
     const res = await approveCycle(cycleId, user.uid);
     if (res.ok) {
-      setCycles((prev) =>
-        prev.map((c) => (c.cycleId === cycleId ? (res.data as Cycle) : c))
-      );
+      const updatedCycle = res.data as Cycle;
+      const allApproved = updatedCycle.approvals.every((a) => a.approved);
+      if (allApproved) {
+        setCycles((prev) => prev.filter((c) => c.cycleId !== cycleId));
+        fetchEdges();
+      } else {
+        setCycles((prev) =>
+          prev.map((c) => (c.cycleId === cycleId ? updatedCycle : c))
+        );
+      }
     }
   };
 
@@ -114,7 +121,7 @@ export default function DashboardPage() {
       <div className="dashboard-bento grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0 w-full">
         {/* Left: Trades */}
         <section className="flex flex-col h-full min-h-0 p-6 border-r border-[rgba(13,148,136,0.15)] bg-transparent">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Trades</h2>
+          <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-4">Trades</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
             <TradeForm
               give={give}
@@ -134,7 +141,7 @@ export default function DashboardPage() {
 
         {/* Right: Cycles */}
         <section className="flex flex-col h-full min-h-0 p-6 bg-transparent">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Cycles</h2>
+          <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-4">Cycles</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col flex-1 min-h-0 overflow-hidden">
             <p className="text-[var(--color-text)]/70 text-sm mb-3 shrink-0">
               Matches with other users&apos; trade requests.

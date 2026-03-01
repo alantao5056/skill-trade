@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import NavBarWrapper from "./NavBarWrapper";
-import LayoutContent from "./LayoutContent";
+import NavBarWrapper from "@/app/components/layout/NavBarWrapper";
+import LayoutContent from "@/app/components/layout/LayoutContent";
 import { UserProvider } from "@/context/UserContext";
 
 const poppins = Poppins({

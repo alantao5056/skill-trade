@@ -7,8 +7,9 @@ import { useUser } from "@/context/UserContext";
 import { getUser, getSkills, updateUserProfile } from "@/firebase/utils";
 import type { User as UserModel } from "@/models/User";
 import type { Skill } from "@/models/Skill";
-import SignOutButton from "@/app/SignOutButton";
-import SpotlightCard from "@/app/SpotlightCard";
+import SignOutButton from "@/app/components/auth/SignOutButton";
+import SpotlightCard from "@/app/components/ui/SpotlightCard";
+import UserLink from "@/app/components/ui/UserLink";
 
 type UserProps = {
   userId: string;
@@ -136,7 +137,9 @@ export default function User({ userId }: UserProps) {
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
-              <h1 className="text-2xl font-semibold">{displayName}</h1>
+              <h1 className="text-2xl font-semibold">
+                <UserLink uid={userId} name={displayName} />
+              </h1>
               {isOwnProfile && (
                 <button
                   type="button"

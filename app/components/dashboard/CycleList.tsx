@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Cycle } from "@/models/Cycle";
+import UserLink from "@/app/components/ui/UserLink";
 
 interface CycleListProps {
   cycles: Cycle[];
@@ -29,9 +30,11 @@ function ApprovalChain({
         const approved = approvalLookup.get(uid) ?? false;
         return (
           <React.Fragment key={uid}>
-            <span className={approved ? "text-green-600 font-medium" : "text-amber-500 font-medium"}>
-              {userMap[uid] ?? uid}
-            </span>
+            <UserLink
+              uid={uid}
+              name={userMap[uid] ?? uid}
+              className={approved ? "text-green-600 font-medium" : "text-amber-500 font-medium"}
+            />
             {i < uids.length - 1 && (
               <span className="text-[var(--color-text)]/40">→</span>
             )}
@@ -52,7 +55,7 @@ function SkillChain({
   return (
     <span className="flex flex-wrap items-center gap-1 text-sm">
       {skillIds.map((id, i) => (
-        <React.Fragment key={id}>
+        <React.Fragment key={i}>
           <span className="text-[var(--color-text)]">{skillMap[id] ?? id}</span>
           {i < skillIds.length - 1 && (
             <span className="text-[var(--color-text)]/40">→</span>

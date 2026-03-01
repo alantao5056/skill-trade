@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
+import UserLink from "@/app/components/ui/UserLink";
 
 export default function SignInButton() {
   const { user, loading, signInWithGoogle, signOut } = useUser();
@@ -16,9 +17,11 @@ export default function SignInButton() {
   if (user) {
     return (
       <div className="inline-flex items-center gap-3 pointer-events-auto">
-        <span className="text-sm font-medium text-gray-700 truncate max-w-[160px]">
-          {user.displayName ?? user.email ?? "Signed in"}
-        </span>
+        <UserLink
+          uid={user.uid}
+          name={user.displayName ?? user.email ?? "Signed in"}
+          className="text-sm font-medium text-gray-700 truncate max-w-[160px]"
+        />
         <button
           type="button"
           onClick={() => signOut()}

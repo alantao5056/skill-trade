@@ -1,64 +1,49 @@
-import { dummyUsers } from "@/lib/dummy-data";
+"use client";
 
-type Meeting = {
-  id: string;
-  title: string;
-  participants: string[];
-  date: string;
-  time: string;
-  status: string;
-};
+import { useEffect, useState } from "react";
+import { getUser, getSkill } from "@/firebase/utils";
+import type { Meeting } from "@/models/Meeting";
+import UserLink from "@/app/components/ui/UserLink";
 
-type MeetingsCardProps = {
+interface MeetingsCardProps {
   meeting: Meeting;
-};
+  onDismiss: (meetingId: string) => void;
+}
 
-export default function MeetingsCard({ meeting }: MeetingsCardProps) {
-  // derive participant names individually so we can show arrow direction
-  const participantList = meeting.participants.map(
-    (id) => dummyUsers.find((u) => u.id === id)?.name ?? id
-  );
-  const firstParticipant = participantList[0] ?? "";
-  const secondParticipant = participantList[1] ?? participantList.slice(1).join(", ");
+export default function MeetingsCard({ meeting, onDismiss }: MeetingsCardProps) {
+  const [giverName, setGiverName] = useState(meeting.giveUid);
+  const [receiverName, setReceiverName] = useState(meeting.wantUid);
+  const [skillLabel, setSkillLabel] = useState(meeting.skillId);
 
-  // use the meeting title as the skill label; could parse differently if needed
-  const skillLabel = meeting.title;
+  useEffect(() => {
+    getUser(meeting.giveUid).then((r) => {
+      if (r.ok) setGiverName(r.data.displayName ?? meeting.giveUid);
+    });
+    getUser(meeting.wantUid).then((r) => {
+      if (r.ok) setReceiverName(r.data.displayName ?? meeting.wantUid);
+    });
+    getSkill(meeting.skillId).then((r) => {
+      if (r.ok) setSkillLabel(r.data.label ?? meeting.skillId);
+    });
+  }, [meeting.giveUid, meeting.wantUid, meeting.skillId]);
 
   return (
-  <div className="card p-6 space-y-4 w-full">
-
-    {/* Arrow Row */}
-    <div className="flex items-center justify-between">
-
-      {/* Left Person */}
-      <span className="font-semibold text-gray-800">
-        {firstParticipant}
-      </span>
-
-      {/* Center Arrow + Skill */}
-      <div className="flex items-center flex-1 mx-6">
-        <div className="flex-1 h-0.5 bg-teal-300"></div>
-
-        <span className="badge-skill mx-4">
-          {skillLabel}
-        </span>
-
-        <div className="flex-1 h-0.5 bg-teal-300"></div>
+    <div className="card p-4 flex items-center justify-between w-full">
+      <div className="flex items-center gap-3 text-sm">
+        <UserLink uid={meeting.giveUid} name={giverName} className="font-semibold text-gray-800" />
+        <span className="text-gray-400">→</span>
+        <span className="badge-skill">{skillLabel}</span>
+        <span className="text-gray-400">→</span>
+        <UserLink uid={meeting.wantUid} name={receiverName} className="font-semibold text-gray-800" />
       </div>
 
-      {/* Right Person */}
-      <span className="font-semibold text-gray-800 text-right">
-        {secondParticipant}
-      </span>
-
+      <button
+        type="button"
+        onClick={() => onDismiss(meeting.meetingId)}
+        className="text-xs px-3 py-1 rounded-lg border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
+      >
+        Dismiss
+      </button>
     </div>
-
-    {/* Meeting Details */}
-    <div className="flex justify-between text-sm text-gray-500">
-      <span>{meeting.date}</span>
-      <span>{meeting.time}</span>
-      <span>{meeting.status}</span>
-    </div>
-  </div>
-);
+  );
 }
