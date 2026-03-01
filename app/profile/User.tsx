@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { getUser, getSkills, updateUserProfile } from "@/firebase/utils";
 import type { User as UserModel } from "@/models/User";
 import type { Skill } from "@/models/Skill";
+import SignOutButton from "../SignOutButton";
 
 type UserProps = {
   userId: string;

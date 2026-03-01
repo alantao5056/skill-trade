@@ -47,6 +47,7 @@ async function dfs(targetSkill: string, skillId: string, visited: Set<string>, e
       // check if cycle already exists
       if (!await hasCycle(canonicalKey)) {
         const cycle: Cycle = {
+          cycleId: "",
           approvals: [...new Set(uidStack)].map(uid => ({ uid, approved: false })),
           edgeIds: [...edgeStack],
           skillIds: [...skillStack],
@@ -115,6 +116,7 @@ async function processAdd(from: string, to: string, uid: string) {
       console.log("updating user", uid, "with cycle", cycleRef.id);
       await updateDoc(doc(db, "users", uid), { cycles: arrayUnion(cycleRef.id) });
     }
+    await updateDoc(cycleRef, { cycleId: cycleRef.id });
   }
 }
 
