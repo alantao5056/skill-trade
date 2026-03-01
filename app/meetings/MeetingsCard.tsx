@@ -33,15 +33,6 @@ export default function MeetingsCard({ meeting }: MeetingsCardProps) {
       <p className="meeting-info">
         {firstParticipant} → {secondParticipant}
       </p>
-      <span
-        className={`inline-block mt-2 px-2 py-0.5 rounded text-xs ${
-          meeting.status === "completed"
-            ? "bg-gray-200 dark:bg-gray-700"
-            : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-        }`}
-      >
-        {meeting.status}
-      </span>
     </div>
   );
 }
