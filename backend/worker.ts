@@ -3,7 +3,7 @@ import { addEdge, deleteEdge } from "@/firebase/utils";
 import { Cycle } from "@/models/Cycle";
 import { Edge } from "@/models/Edge";
 import { Task } from "@/models/Task";
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, deleteField, doc, getDoc, getDocs, getFirestore, increment, limit, orderBy, query, updateDoc, where } from "firebase/firestore";
 
 const DELAY = 2000;
 
@@ -103,10 +103,14 @@ async function processAdd(from: string, to: string, uid: string) {
     nbs.set(to, []);
   }
 
+  await updateDoc(doc(db, "users", uid), {
+    [`offer.${from}`]: increment(1),
+    [`need.${to}`]: increment(1),
+  });
+
   const cycles = await getCycles(edgeId);
   for (const cycle of cycles) {
     const cycleRef = await addDoc(collection(db, 'cycles'), cycle);
-    // await updateDoc(doc(db, 'cycles', cycleRef.id), { cycleId: cycleRef.id });
     for (const uid of cycle.uids) {
       console.log("updating user", uid, "with cycle", cycleRef.id);
       await updateDoc(doc(db, "users", uid), { cycles: arrayUnion(cycleRef.id) });
@@ -149,6 +153,23 @@ async function processRemove(edgeId: string) {
       fromEdges.splice(idx, 1);
     }
   }
+
+  const remainingUserEdges = Array.from(edges.values()).filter(e => e.uid === edge.uid);
+  const offerCount = remainingUserEdges.filter(e => e.from === edge.from).length;
+  const needCount = remainingUserEdges.filter(e => e.to === edge.to).length;
+
+  const userUpdate: Record<string, any> = {};
+  if (offerCount === 0) {
+    userUpdate[`offer.${edge.from}`] = deleteField();
+  } else {
+    userUpdate[`offer.${edge.from}`] = increment(-1);
+  }
+  if (needCount === 0) {
+    userUpdate[`need.${edge.to}`] = deleteField();
+  } else {
+    userUpdate[`need.${edge.to}`] = increment(-1);
+  }
+  await updateDoc(doc(db, "users", edge.uid), userUpdate);
 }
 
 async function getAllEdgesFirebase() {
@@ -169,29 +190,31 @@ async function getAllEdgesFirebase() {
 
 async function addDummyTask(type: "add" | "remove", from: string, to: string, uid: string, edgeId: string) {
   const db = getFirestore(app);
-  const task: Task = { type, from, to, uid, edgeId };
+  const task: Task = { type, from, to, uid, edgeId, createdAt: Date.now() };
   const taskRef = await addDoc(collection(db, 'queue'), task);
   console.log("added dummy task", taskRef.id);
 }
 
 async function main() {
-  await addDummyTask("add", "skill1", "skill2", "uid1", "");
-  await addDummyTask("add", "skill2", "skill3", "uid2", "");
-  await addDummyTask("add", "skill3", "skill1", "uid3", "");
+  // await addDummyTask("add", "skill1", "skill2", "uid1", "");
+  // await addDummyTask("add", "skill2", "skill3", "uid2", "");
+  // await addDummyTask("add", "skill3", "skill1", "uid3", "");
+  // await addDummyTask("add", "skill1", "skill2", "uid4", "");
+  // await addDummyTask("remove", "", "", "", "UNpszkqs3bffxPj30Idi");
   // await addDummyTask("remove", "", "", "", "6gSmshduXRUQ5KvexTRG");
   await getAllEdgesFirebase();
   const db = getFirestore(app);
   while (true) {
-    // TODO: get by created timestamp
     const queueRef = collection(db, 'queue');
-    const queue = await getDocs(queueRef);
+    const queueQuery = query(queueRef, orderBy('createdAt', 'asc'), limit(1));
+    const queue = await getDocs(queueQuery);
     if (queue.empty) {
       console.log("no tasks");
       await new Promise(resolve => setTimeout(resolve, DELAY));
       continue;
     }
-    const taskRef = doc(db, 'queue', queue.docs[0].id);
-    const task = (await getDoc(taskRef)).data() as Task;
+    const taskDoc = queue.docs[0];
+    const task = taskDoc.data() as Task;
     if (task.type === "add") {
       console.log("processing add");
       await processAdd(task.from, task.to, task.uid);
@@ -199,7 +222,7 @@ async function main() {
       console.log("processing remove");
       await processRemove(task.edgeId);
     }
-    await deleteDoc(taskRef);
+    await deleteDoc(taskDoc.ref);
   }
 }
 
