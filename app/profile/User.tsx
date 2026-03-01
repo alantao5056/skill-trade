@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { VscEdit } from "react-icons/vsc";
 import { useUser } from "@/context/UserContext";
 import { getUser, getSkills, updateUserProfile } from "@/firebase/utils";
 import type { User as UserModel } from "@/models/User";
 import type { Skill } from "@/models/Skill";
+import SignOutButton from "@/app/SignOutButton";
+import SpotlightCard from "@/app/SpotlightCard";
 
 type UserProps = {
   userId: string;
@@ -70,13 +73,25 @@ export default function User({ userId }: UserProps) {
   };
 
   if (loading || authLoading) {
-    return <div className="p-6 font-sans">Loading...</div>;
+    return (
+      <div className="p-6 font-sans flex justify-center items-center min-h-[calc(100vh-7rem)]">
+        <div className="w-full max-w-xl">
+          <SpotlightCard spotlightColor="rgba(0, 229, 255, 0.15)">
+            <div className="text-center">Loading...</div>
+          </SpotlightCard>
+        </div>
+      </div>
+    );
   }
 
   if (error || !profileUser) {
     return (
-      <div className="p-6 font-sans">
-        <p>{error || "User not found."}</p>
+      <div className="p-6 font-sans flex justify-center items-center min-h-[calc(100vh-7rem)]">
+        <div className="w-full max-w-xl">
+          <SpotlightCard spotlightColor="rgba(0, 229, 255, 0.15)">
+            <p className="text-center">{error || "User not found."}</p>
+          </SpotlightCard>
+        </div>
       </div>
     );
   }
@@ -86,11 +101,13 @@ export default function User({ userId }: UserProps) {
   const needSkillIds = Object.keys(profileUser.need ?? {});
 
   return (
-    <div className="p-6 max-w-xl font-sans">
-      <div className="space-y-6">
-        <div>
-          {isOwnProfile && isEditingName ? (
-            <div className="flex items-center gap-2">
+    <div className="p-6 font-sans flex justify-center items-center min-h-[calc(100vh-7rem)]">
+      <div className="w-full max-w-xl">
+        <SpotlightCard spotlightColor="rgba(0, 229, 255, 0.15)">
+        <div className="space-y-6 flex flex-col items-center text-center">
+          <div>
+            {isOwnProfile && isEditingName ? (
+            <div className="flex items-center justify-center gap-2">
               <input
                 type="text"
                 value={nameInput}
@@ -118,15 +135,16 @@ export default function User({ userId }: UserProps) {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <h1 className="text-2xl font-semibold">{displayName}</h1>
               {isOwnProfile && (
                 <button
                   type="button"
                   onClick={startEditingName}
-                  className="text-sm text-[var(--color-primary)] hover:underline"
+                  className="text-[var(--color-primary)] hover:opacity-80 p-1 rounded"
+                  aria-label="Edit name"
                 >
-                  Edit name
+                  <VscEdit size={18} />
                 </button>
               )}
             </div>
@@ -148,7 +166,7 @@ export default function User({ userId }: UserProps) {
         />
 
         {isOwnProfile && (
-          <>
+          <div className="flex flex-col items-center">
             <Link
               href="/meetings"
               className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
@@ -158,8 +176,10 @@ export default function User({ userId }: UserProps) {
             <div className="mt-4">
               <SignOutButton />
             </div>
-          </>
+          </div>
         )}
+        </div>
+      </SpotlightCard>
       </div>
     </div>
   );
@@ -174,12 +194,12 @@ type SkillListProps = {
 
 function SkillList({ title, skillIds, getSkillLabel, emptyText }: SkillListProps) {
   return (
-    <div>
+    <div className="w-full flex flex-col items-center">
       <h2 className="text-lg font-medium mb-2">{title}</h2>
       {skillIds.length === 0 ? (
         <p className="text-sm text-gray-500">{emptyText}</p>
       ) : (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2 justify-center">
           {skillIds.map((id) => (
             <li
               key={id}

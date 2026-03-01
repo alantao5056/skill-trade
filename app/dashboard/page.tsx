@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
       <div className="dashboard-bento grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0 w-full">
         {/* Left: Trades */}
-        <section className="flex flex-col h-full min-h-0 p-6 border-r border-[rgba(13,148,136,0.15)] bg-[var(--color-background)]">
+        <section className="flex flex-col h-full min-h-0 p-6 border-r border-[rgba(13,148,136,0.15)] bg-transparent">
           <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Trades</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
             <form onSubmit={addTrade} className="flex flex-wrap items-end gap-3 shrink-0">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Right: Cycles */}
-        <section className="flex flex-col h-full min-h-0 p-6 bg-[var(--color-background)]">
+        <section className="flex flex-col h-full min-h-0 p-6 bg-transparent">
           <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Cycles</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col flex-1 min-h-0 overflow-hidden">
             <p className="text-[var(--color-text)]/70 text-sm mb-3 shrink-0">Matches with other users’ trade requests.</p>
