@@ -1,12 +1,39 @@
 "use client";
 
-/*import { signIn } from "next-auth/react";
+import { useUser } from "@/context/UserContext";
 
 export default function SignInButton() {
+  const { user, loading, signInWithGoogle, signOut } = useUser();
+
+  if (loading) {
+    return (
+      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-gray-500 pointer-events-auto animate-pulse">
+        Loading…
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="inline-flex items-center gap-3 pointer-events-auto">
+        <span className="text-sm font-medium text-gray-700 truncate max-w-[160px]">
+          {user.displayName ?? user.email ?? "Signed in"}
+        </span>
+        <button
+          type="button"
+          onClick={() => signOut()}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Sign out
+        </button>
+      </div>
+    );
+  }
+
   return (
     <button
       type="button"
-      onClick={() => signIn("google", { callbackUrl: "/" })}
+      onClick={() => signInWithGoogle()}
       className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-colors pointer-events-auto"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -19,4 +46,3 @@ export default function SignInButton() {
     </button>
   );
 }
-  */

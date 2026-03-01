@@ -15,7 +15,7 @@ export default function NavBar() {
   ];
 
   return (
-    <nav className="bg-teal-600 text-white flex justify-around py-4">
+    <nav className="relative z-10 bg-teal-600 text-white flex justify-around py-4">
       {items.map((item, index) => (
         <Link
           key={index}
