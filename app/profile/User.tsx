@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { dummyUsers } from "@/lib/dummy-data";
+import SignOutButton from "@/app/SignOutButton";
 
 type UserProps = {
   userId: string;
@@ -153,12 +154,17 @@ export default function User({ userId, currentUserId }: UserProps) {
         </div>
 
         {isOwnProfile && (
-          <Link
-            href="/meetings"
-            className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
-          >
-            My meetings
-          </Link>
+          <>
+            <Link
+              href="/meetings"
+              className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
+            >
+              My meetings
+            </Link>
+            <div className="mt-4">
+              <SignOutButton />
+            </div>
+          </>
         )}
       </div>
     </div>

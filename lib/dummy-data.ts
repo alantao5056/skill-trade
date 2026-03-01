@@ -44,3 +44,53 @@ export const dummyMeetings = [
     status: "completed",
   },
 ];
+
+export const dummySkills = [
+  "React",
+  "TypeScript",
+  "UI Design",
+  "Python",
+  "Data Analysis",
+  "Machine Learning",
+  "Node.js",
+  "GraphQL",
+  "DevOps",
+];
+
+export type DummyTradeRequest = {
+  id: string;
+  uid: string;
+  give: string;
+  want: string;
+};
+
+export const dummyTradeRequests: DummyTradeRequest[] = [
+  { id: "tr-1", uid: "user-1", give: "React", want: "Python" },
+  { id: "tr-2", uid: "user-1", give: "TypeScript", want: "Data Analysis" },
+  { id: "tr-3", uid: "user-2", give: "Python", want: "React" },
+];
+
+export type DummyCycleMatch = {
+  id: string;
+  canonicalKey: string;
+  skillIds: string[];
+  uids: string[];
+  summary: string;
+};
+
+export const dummyCycles: DummyCycleMatch[] = [
+  {
+    id: "cycle-1",
+    canonicalKey: "react-python",
+    skillIds: ["React", "Python"],
+    uids: ["user-1", "user-2"],
+    summary: "React ↔ Python",
+  },
+  {
+    id: "cycle-2",
+    canonicalKey: "typescript-data",
+    skillIds: ["TypeScript", "Data Analysis"],
+    uids: ["user-1", "user-2"],
+    summary: "TypeScript ↔ Data Analysis",
+  },
+];
