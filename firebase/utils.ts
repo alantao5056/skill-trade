@@ -4,6 +4,7 @@ import { Skill } from '@/models/Skill';
 import { Edge } from '@/models/Edge';
 import { Res } from '@/models/Res';
 import { Cycle } from '@/models/Cycle';
+import { User } from '@/models/User';
 
 export async function getSkills(): Promise<Res> {
   const db = getFirestore(app);
@@ -113,3 +114,23 @@ export async function getUserCycles(userId: string): Promise<Res> {
   }
 }
 
+export async function getUser(userId: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const userRef = doc(db, "users", userId);
+    const user = await getDoc(userRef);
+    const res: Res = {
+      ok: true,
+      data: user.data() as User,
+      error: "",
+    };
+    return res;
+  } catch (err) {
+    const res: Res = {
+      ok: false,
+      data: null,
+      error: "Failed to get user",
+    };
+    return res;
+  }
+}
