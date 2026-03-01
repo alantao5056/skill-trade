@@ -3,4 +3,5 @@ export interface Task {
   from: string;
   to: string;
   uid: string;
+  edgeId: string;
 }

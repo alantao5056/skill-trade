@@ -1,5 +1,5 @@
 import app from './auth';
-import { getFirestore, getDoc, doc, collection, getDocs, where, query, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, getDoc, doc, collection, getDocs, where, query, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { Skill } from '@/models/Skill';
 import { Edge } from '@/models/Edge';
 import { Res } from '@/models/Res';
@@ -53,6 +53,7 @@ export async function addEdge(from: string, to: string, uid: string): Promise<Re
     const edgesRef = collection(db, 'edges');
     const docRef = await addDoc(edgesRef, { from, to, uid });
     await updateDoc(doc(edgesRef, docRef.id), { edgeId: docRef.id });
+    await updateDoc(doc(db, "users", uid), { edges: arrayUnion(docRef.id) });
     const res: Res = {
       ok: true,
       data: { edgeId: docRef.id, from, to, uid } as Edge,
@@ -69,11 +70,12 @@ export async function addEdge(from: string, to: string, uid: string): Promise<Re
   }
 }
 
-export async function deleteEdge(edgeId: string): Promise<Res> {
+export async function deleteEdge(edgeId: string, uid: string): Promise<Res> {
   const db = getFirestore(app);
   try {
     const edgesRef = collection(db, 'edges');
     await deleteDoc(doc(edgesRef, edgeId));
+    await updateDoc(doc(db, "users", uid), { edges: arrayRemove(edgeId) });
     const res: Res = {
       ok: true,
       data: null,
