@@ -11,9 +11,17 @@ interface TradeFormProps {
   onGiveChange: (value: string) => void;
   onWantChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  userOffer: Record<string, number>;
+  userNeed: Record<string, number>;
 }
 
-function GroupedSkillOptions({ skills }: { skills: Skill[] }) {
+function GroupedSkillOptions({
+  skills,
+  disabledSkills,
+}: {
+  skills: Skill[];
+  disabledSkills: Set<string>;
+}) {
   const grouped = useMemo(() => {
     const map = new Map<string, Skill[]>();
     for (const skill of skills) {
@@ -29,7 +37,7 @@ function GroupedSkillOptions({ skills }: { skills: Skill[] }) {
       {grouped.map(([category, items]) => (
         <optgroup key={category} label={category}>
           {items.map((s) => (
-            <option key={s.id} value={s.id}>
+            <option key={s.id} value={s.id} disabled={disabledSkills.has(s.id)}>
               {s.label}
             </option>
           ))}
@@ -45,6 +53,8 @@ export default function TradeForm({
   onGiveChange,
   onWantChange,
   onSubmit,
+  userOffer,
+  userNeed,
 }: TradeFormProps) {
   const [skills, setSkills] = useState<Skill[]>([]);
 
@@ -55,6 +65,9 @@ export default function TradeForm({
       }
     });
   }, []);
+
+  const disabledForGive = useMemo(() => new Set(Object.keys(userOffer)), [userOffer]);
+  const disabledForWant = useMemo(() => new Set(Object.keys(userNeed)), [userNeed]);
 
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-4 shrink-0">
@@ -68,7 +81,7 @@ export default function TradeForm({
           <option value="" disabled>
             Select skill…
           </option>
-          <GroupedSkillOptions skills={skills} />
+          <GroupedSkillOptions skills={skills} disabledSkills={disabledForGive} />
         </select>
       </label>
 
@@ -82,7 +95,7 @@ export default function TradeForm({
           <option value="" disabled>
             Select skill…
           </option>
-          <GroupedSkillOptions skills={skills} />
+          <GroupedSkillOptions skills={skills} disabledSkills={disabledForWant} />
         </select>
       </label>
 

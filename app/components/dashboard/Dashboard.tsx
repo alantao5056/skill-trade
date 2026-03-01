@@ -15,6 +15,7 @@ import {
 import type { Edge } from "@/models/Edge";
 import type { Cycle } from "@/models/Cycle";
 import type { Skill } from "@/models/Skill";
+import type { User as AppUser } from "@/models/User";
 import TradeForm from "./TradeForm";
 import TradeList from "./TradeList";
 import CycleList from "./CycleList";
@@ -30,6 +31,8 @@ export default function Dashboard() {
   const [want, setWant] = useState("");
   const [skillMap, setSkillMap] = useState<Record<string, string>>({});
   const [userMap, setUserMap] = useState<Record<string, string>>({});
+  const [userOffer, setUserOffer] = useState<Record<string, number>>({});
+  const [userNeed, setUserNeed] = useState<Record<string, number>>({});
 
   const fetchEdges = useCallback(async () => {
     if (!user) return;
@@ -68,10 +71,21 @@ export default function Dashboard() {
     setCyclesLoading(false);
   }, [user]);
 
+  const fetchUserDoc = useCallback(async () => {
+    if (!user) return;
+    const res = await getUser(user.uid);
+    if (res.ok) {
+      const doc = res.data as AppUser;
+      setUserOffer(doc.offer ?? {});
+      setUserNeed(doc.need ?? {});
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     fetchEdges();
     fetchCycles();
+    fetchUserDoc();
 
     getSkills().then((res) => {
       if (res.ok) {
@@ -82,14 +96,21 @@ export default function Dashboard() {
         setSkillMap(map);
       }
     });
-  }, [user, fetchEdges, fetchCycles]);
+  }, [user, fetchEdges, fetchCycles, fetchUserDoc]);
 
   const handleAddEdge = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !give || !want || give === want) return;
-    await enqueueAddEdge(give, want, user.uid);
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticEdge: Edge = { edgeId: tempId, from: give, to: want, uid: user.uid };
+    setEdges((prev) => [...prev, optimisticEdge]);
+    setUserOffer((prev) => ({ ...prev, [give]: (prev[give] ?? 0) + 1 }));
+    setUserNeed((prev) => ({ ...prev, [want]: (prev[want] ?? 0) + 1 }));
     setGive("");
     setWant("");
+
+    enqueueAddEdge(give, want, user.uid);
   };
 
   const handleDeleteEdge = async (edgeId: string) => {
@@ -97,6 +118,7 @@ export default function Dashboard() {
     const res = await enqueueRemoveEdge(edgeId, user.uid);
     if (res.ok) {
       setEdges((prev) => prev.filter((e) => e.edgeId !== edgeId));
+      fetchUserDoc();
     }
   };
 
@@ -140,6 +162,8 @@ export default function Dashboard() {
               onGiveChange={setGive}
               onWantChange={setWant}
               onSubmit={handleAddEdge}
+              userOffer={userOffer}
+              userNeed={userNeed}
             />
             <TradeList
               edges={edges}
