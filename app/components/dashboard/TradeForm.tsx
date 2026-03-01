@@ -81,7 +81,7 @@ export default function TradeForm({
           <option value="" disabled>
             Select skill…
           </option>
-          <GroupedSkillOptions skills={skills} disabledSkills={disabledForGive} />
+          <GroupedSkillOptions skills={skills} disabledSkills={disabledForWant} />
         </select>
       </label>
 
@@ -95,7 +95,7 @@ export default function TradeForm({
           <option value="" disabled>
             Select skill…
           </option>
-          <GroupedSkillOptions skills={skills} disabledSkills={disabledForWant} />
+          <GroupedSkillOptions skills={skills} disabledSkills={disabledForGive} />
         </select>
       </label>
 
