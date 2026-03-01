@@ -112,11 +112,9 @@ export default function DashboardPage() {
   return (
     <main className="font-sans h-screen w-full flex flex-col overflow-hidden">
       <div className="dashboard-bento grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0 w-full">
-        {/* Trades */}
-        <section className="flex flex-col h-full min-h-0 p-6 border-r border-teal-600/15 bg-[var(--color-background)]">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
-            Trades
-          </h2>
+        {/* Left: Trades */}
+        <section className="flex flex-col h-full min-h-0 p-6 border-r border-[rgba(13,148,136,0.15)] bg-transparent">
+          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Trades</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
             <TradeForm
               give={give}
@@ -134,11 +132,9 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Cycles */}
-        <section className="flex flex-col h-full min-h-0 p-6 bg-[var(--color-background)]">
-          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
-            Cycles
-          </h2>
+        {/* Right: Cycles */}
+        <section className="flex flex-col h-full min-h-0 p-6 bg-transparent">
+          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Cycles</h2>
           <div className="dashboard-card dashboard-card--glow rounded-[20px] border p-5 flex flex-col flex-1 min-h-0 overflow-hidden">
             <p className="text-[var(--color-text)]/70 text-sm mb-3 shrink-0">
               Matches with other users&apos; trade requests.
