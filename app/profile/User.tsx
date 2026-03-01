@@ -21,7 +21,7 @@ export default function User({ userId, currentUserId }: UserProps) {
 
   if (!user) {
     return (
-      <div className="p-6">
+      <div className="p-6 font-sans">
         <p>User not found.</p>
       </div>
     );
@@ -31,7 +31,7 @@ export default function User({ userId, currentUserId }: UserProps) {
   const displaySkills = skills.length ? skills : user.skills;
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="p-6 max-w-xl font-sans">
       <div className="space-y-4">
         <div>
           {isOwnProfile && !isEditingName ? (

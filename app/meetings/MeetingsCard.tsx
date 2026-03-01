@@ -19,7 +19,7 @@ export default function MeetingsCard({ meeting }: MeetingsCardProps) {
     .join(", ");
 
   return (
-    <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow font-sans">
       <h3 className="font-semibold text-lg">{meeting.title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
         {participantNames}
