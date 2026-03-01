@@ -48,6 +48,16 @@
     font-weight: 500;
   }
 
+  /* alias for skill-tag as mentioned in design requirements */
+  .skill-tag {
+    background-color: #ffedd5;
+    color: #ea580c;           
+    padding: 0.25rem 0.75rem;  
+    border-radius: 9999px;
+    font-size: 0.875rem;       
+    font-weight: 500;
+  }
+
 
   .card {
     background-color: white;
@@ -59,6 +69,13 @@
 
   .card:hover {
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  /* utility for meeting info text to avoid inline Tailwind classes */
+  .meeting-info {
+    color: var(--color-text);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
   }
 
   .ribbons-container {
