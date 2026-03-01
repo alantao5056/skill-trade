@@ -14,28 +14,51 @@ type MeetingsCardProps = {
 };
 
 export default function MeetingsCard({ meeting }: MeetingsCardProps) {
-  const participantNames = meeting.participants
-    .map((id) => dummyUsers.find((u) => u.id === id)?.name ?? id)
-    .join(", ");
+  // derive participant names individually so we can show arrow direction
+  const participantList = meeting.participants.map(
+    (id) => dummyUsers.find((u) => u.id === id)?.name ?? id
+  );
+  const firstParticipant = participantList[0] ?? "";
+  const secondParticipant = participantList[1] ?? participantList.slice(1).join(", ");
+
+  // use the meeting title as the skill label; could parse differently if needed
+  const skillLabel = meeting.title;
 
   return (
-    <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow font-sans">
-      <h3 className="font-semibold text-lg">{meeting.title}</h3>
-      <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-        {participantNames}
-      </p>
-      <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
-        {meeting.date} at {meeting.time}
-      </p>
-      <span
-        className={`inline-block mt-2 px-2 py-0.5 rounded text-xs ${
-          meeting.status === "completed"
-            ? "bg-gray-200 dark:bg-gray-700"
-            : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-        }`}
-      >
-        {meeting.status}
+  <div className="card p-6 space-y-4 w-full">
+
+    {/* Arrow Row */}
+    <div className="flex items-center justify-between">
+
+      {/* Left Person */}
+      <span className="font-semibold text-gray-800">
+        {firstParticipant}
       </span>
+
+      {/* Center Arrow + Skill */}
+      <div className="flex items-center flex-1 mx-6">
+        <div className="flex-1 h-0.5 bg-teal-300"></div>
+
+        <span className="badge-skill mx-4">
+          {skillLabel}
+        </span>
+
+        <div className="flex-1 h-0.5 bg-teal-300"></div>
+      </div>
+
+      {/* Right Person */}
+      <span className="font-semibold text-gray-800 text-right">
+        {secondParticipant}
+      </span>
+
     </div>
-  );
+
+    {/* Meeting Details */}
+    <div className="flex justify-between text-sm text-gray-500">
+      <span>{meeting.date}</span>
+      <span>{meeting.time}</span>
+      <span>{meeting.status}</span>
+    </div>
+  </div>
+);
 }

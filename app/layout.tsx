@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import NavBarWrapper from "./NavBarWrapper";
+import LayoutContent from "./LayoutContent";
 import { UserProvider } from "@/context/UserContext";
 
 const poppins = Poppins({
@@ -21,11 +22,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} font-sans antialiased`}>
+    <html lang="en" className="overflow-hidden">
+      <body className={`${poppins.variable} font-sans antialiased min-h-screen overflow-hidden`}>
         <UserProvider>
           <NavBarWrapper />
-          {children}
+          <LayoutContent>{children}</LayoutContent>
         </UserProvider>
       </body>
     </html>

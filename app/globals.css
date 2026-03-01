@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
 @theme {
   --color-primary: #319795;
   --color-primary-hover: #0f766e;
@@ -48,6 +54,19 @@
     font-weight: 500;
   }
 
+  /* alias for skill-tag as mentioned in design requirements */
+  .skill-tag {
+    background-color: #ffedd5;
+    color: #ea580c;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 120px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
 
   .card {
     background-color: white;
@@ -61,6 +80,41 @@
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.08);
   }
 
+  /* utility for meeting info text to avoid inline Tailwind classes */
+  .meeting-info {
+    color: var(--color-text);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .meeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.meeting-arrow {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-line {
+  flex: 1;
+  height: 2px;
+  background-color: #5eead4;
+}
+
+/* Stack vertically on small screens */
+@media (max-width: 640px) {
+  .meeting-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
   .ribbons-container {
     position: relative;
     overflow: hidden;
@@ -72,5 +126,13 @@
     left: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .dock-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
   }
 }

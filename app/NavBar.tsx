@@ -1,31 +1,41 @@
 "use client";
 
-import Link from "next/link";
-import {
-  VscHome,
-  VscAccount,
-} from "react-icons/vsc";
+import { useRouter } from "next/navigation";
+import { VscHome, VscAccount } from "react-icons/vsc";
 import { MdMeetingRoom } from "react-icons/md";
+import Dock from "./Dock";
 
 export default function NavBar() {
+  const router = useRouter();
+
   const items = [
-    { icon: <VscHome size={18} />, label: "Home", href: "/" },
-    { icon: <MdMeetingRoom size={18} />, label: "Meetings", href: "/meetings" },
-    { icon: <VscAccount size={18} />, label: "Profile", href: "/profile" },
+    {
+      icon: <VscHome size={18} />,
+      label: "Home",
+      onClick: () => router.push("/"),
+    },
+    {
+      icon: <MdMeetingRoom size={18} />,
+      label: "Meetings",
+      onClick: () => router.push("/meetings"),
+    },
+    {
+      icon: <VscAccount size={18} />,
+      label: "Profile",
+      onClick: () => router.push("/profile"),
+    },
   ];
 
   return (
-    <nav className="relative z-10 bg-teal-600 text-white flex justify-around py-4">
-      {items.map((item, index) => (
-        <Link
-          key={index}
-          href={item.href}
-          className="flex flex-col items-center hover:text-orange-300 transition"
-        >
-          {item.icon}
-          <span className="text-sm mt-1">{item.label}</span>
-        </Link>
-      ))}
-    </nav>
+    <div className="dock-nav z-10 flex justify-center items-end pointer-events-none pb-2">
+      <div className="pointer-events-auto min-h-[100px] flex items-end">
+        <Dock
+          items={items}
+          panelHeight={80}
+          baseItemSize={60}
+          magnification={70}
+        />
+      </div>
+    </div>
   );
 }

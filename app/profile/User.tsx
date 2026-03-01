@@ -148,12 +148,17 @@ export default function User({ userId }: UserProps) {
         />
 
         {isOwnProfile && (
-          <Link
-            href="/meetings"
-            className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
-          >
-            My meetings
-          </Link>
+          <>
+            <Link
+              href="/meetings"
+              className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
+            >
+              My meetings
+            </Link>
+            <div className="mt-4">
+              <SignOutButton />
+            </div>
+          </>
         )}
       </div>
     </div>
