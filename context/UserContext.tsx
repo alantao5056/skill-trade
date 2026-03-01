@@ -18,6 +18,7 @@ import {
   type User,
 } from "firebase/auth";
 import { auth } from "@/firebase/auth";
+import { ensureUserDocument } from "@/firebase/utils";
 
 interface UserContextValue {
   user: User | null;
@@ -37,8 +38,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+      if (firebaseUser) {
+        await ensureUserDocument(firebaseUser.uid, firebaseUser.displayName);
+      }
       setLoading(false);
     });
     return unsubscribe;

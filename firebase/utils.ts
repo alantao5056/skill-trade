@@ -1,9 +1,10 @@
 import app from './auth';
-import { getFirestore, getDoc, doc, collection, getDocs, where, query, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { getFirestore, getDoc, setDoc, doc, collection, getDocs, where, query, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { Skill } from '@/models/Skill';
 import { Edge } from '@/models/Edge';
 import { Res } from '@/models/Res';
 import { Cycle } from '@/models/Cycle';
+import { User } from '@/models/User';
 
 export async function getSkills(): Promise<Res> {
   const db = getFirestore(app);
@@ -113,3 +114,50 @@ export async function getUserCycles(userId: string): Promise<Res> {
   }
 }
 
+export async function ensureUserDocument(
+  uid: string,
+  displayName?: string | null
+): Promise<void> {
+  const db = getFirestore(app);
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) {
+    const newUser: User = {
+      uid,
+      displayName: displayName ?? uid,
+      cycles: [],
+      edges: [],
+      offer: {},
+      need: {},
+    };
+    await setDoc(userRef, newUser);
+  }
+}
+
+export async function getUser(userId: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      return { ok: false, data: null, error: "User not found" };
+    }
+    return { ok: true, data: userSnap.data() as User, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to get user" };
+  }
+}
+
+export async function updateUserProfile(
+  userId: string,
+  data: Partial<Pick<User, "displayName">>
+): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, data);
+    return { ok: true, data: null, error: "" };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to update user profile" };
+  }
+}

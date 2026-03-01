@@ -1,8 +1,8 @@
-import { getSkills } from "./utils";
+import { getSkills, getUser } from "./utils";
 
 async function main() {
-  const skills = await getSkills();
-  console.log(skills);
+  const user = await getUser("uid1");
+  console.log(user);
 }
 
 main();

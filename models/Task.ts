@@ -4,4 +4,5 @@ export interface Task {
   to: string;
   uid: string;
   edgeId: string;
+  createdAt: number;
 }
