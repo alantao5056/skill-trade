@@ -1,156 +1,151 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { dummyUsers } from "@/lib/dummy-data";
+import { useUser } from "@/context/UserContext";
+import { getUser, getSkills, updateUserProfile } from "@/firebase/utils";
+import type { User as UserModel } from "@/models/User";
+import type { Skill } from "@/models/Skill";
 
 type UserProps = {
   userId: string;
-  currentUserId: string;
 };
 
-export default function User({ userId, currentUserId }: UserProps) {
-  const user = dummyUsers.find((u) => u.id === userId);
-  const [name, setName] = useState(user?.name ?? "");
-  const [skills, setSkills] = useState<string[]>(user?.skills ?? []);
+export default function User({ userId }: UserProps) {
+  const { user: authUser, loading: authLoading } = useUser();
+  const [profileUser, setProfileUser] = useState<UserModel | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingSkills, setIsEditingSkills] = useState(false);
-  const [newSkill, setNewSkill] = useState("");
+  const [nameInput, setNameInput] = useState("");
 
-  const isOwnProfile = userId === currentUserId;
+  const isOwnProfile = authUser?.uid === userId;
 
-  if (!user) {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    const [userRes, skillsRes] = await Promise.all([
+      getUser(userId),
+      getSkills(),
+    ]);
+
+    if (userRes.ok && userRes.data) {
+      setProfileUser(userRes.data);
+    } else {
+      setError(userRes.error || "User not found");
+    }
+
+    if (skillsRes.ok) {
+      setSkills(skillsRes.data);
+    }
+
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const getSkillLabel = (skillId: string) => {
+    const skill = skills.find((s) => s.id === skillId);
+    return skill ? skill.label : skillId;
+  };
+
+  const startEditingName = () => {
+    setNameInput(profileUser?.displayName ?? "");
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!profileUser) return;
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    const res = await updateUserProfile(userId, { displayName: trimmed });
+    if (res.ok) {
+      setProfileUser({ ...profileUser, displayName: trimmed });
+      setIsEditingName(false);
+    }
+  };
+
+  if (loading || authLoading) {
+    return <div className="p-6 font-sans">Loading...</div>;
+  }
+
+  if (error || !profileUser) {
     return (
       <div className="p-6 font-sans">
-        <p>User not found.</p>
+        <p>{error || "User not found."}</p>
       </div>
     );
   }
 
-  const displayName = name || user.name;
-  const displaySkills = skills.length ? skills : user.skills;
+  const displayName = profileUser.displayName || profileUser.uid;
+  const offerSkillIds = Object.keys(profileUser.offer ?? {});
+  const needSkillIds = Object.keys(profileUser.need ?? {});
 
   return (
     <div className="p-6 max-w-xl font-sans">
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          {isOwnProfile && !isEditingName ? (
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold">{displayName}</h1>
-              <button
-                type="button"
-                onClick={() => setIsEditingName(true)}
-                className="text-sm text-[var(--color-primary)] hover:underline"
-              >
-                Edit name
-              </button>
-            </div>
-          ) : isOwnProfile && isEditingName ? (
+          {isOwnProfile && isEditingName ? (
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
                 className="border rounded px-2 py-1 text-xl"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveName();
+                  if (e.key === "Escape") setIsEditingName(false);
+                }}
+                autoFocus
               />
               <button
                 type="button"
-                onClick={() => setIsEditingName(false)}
+                onClick={handleSaveName}
                 className="text-sm text-[var(--color-primary)] hover:underline"
               >
                 Save
               </button>
+              <button
+                type="button"
+                onClick={() => setIsEditingName(false)}
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Cancel
+              </button>
             </div>
           ) : (
-            <h1 className="text-2xl font-semibold">{displayName}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold">{displayName}</h1>
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  onClick={startEditingName}
+                  className="text-sm text-[var(--color-primary)] hover:underline"
+                >
+                  Edit name
+                </button>
+              )}
+            </div>
           )}
         </div>
 
-        <div>
-          <h2 className="text-lg font-medium mb-2">Skills</h2>
-          {isOwnProfile && !isEditingSkills ? (
-            <div className="space-y-2">
-              <ul className="flex flex-wrap gap-2">
-                {displaySkills.map((s) => (
-                  <li
-                    key={s}
-                    className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"
-                  >
-                    {s}
-                  </li>
-                ))}
-              </ul>
-              <button
-                type="button"
-                onClick={() => setIsEditingSkills(true)}
-                className="text-sm text-[var(--color-primary)] hover:underline"
-              >
-                Edit skills
-              </button>
-            </div>
-          ) : isOwnProfile && isEditingSkills ? (
-            <div className="space-y-2">
-              <ul className="flex flex-wrap gap-2">
-                {displaySkills.map((s) => (
-                  <li
-                    key={s}
-                    className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded flex items-center gap-1"
-                  >
-                    {s}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSkills((prev) => prev.filter((sk) => sk !== s))
-                      }
-                      className="text-red-500 hover:underline"
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  placeholder="Add skill"
-                  className="border rounded px-2 py-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (newSkill.trim()) {
-                      setSkills((prev) => [...prev, newSkill.trim()]);
-                      setNewSkill("");
-                    }
-                  }}
-                  className="text-sm text-[var(--color-primary)] hover:underline"
-                >
-                  Add
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsEditingSkills(false)}
-                className="text-sm text-[var(--color-primary)] hover:underline block mt-2"
-              >
-                Done
-              </button>
-            </div>
-          ) : (
-            <ul className="flex flex-wrap gap-2">
-              {displaySkills.map((s) => (
-                <li
-                  key={s}
-                  className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <SkillList
+          title="Skills Offered"
+          skillIds={offerSkillIds}
+          getSkillLabel={getSkillLabel}
+          emptyText="No skills offered yet."
+        />
+
+        <SkillList
+          title="Skills Needed"
+          skillIds={needSkillIds}
+          getSkillLabel={getSkillLabel}
+          emptyText="No skills needed yet."
+        />
 
         {isOwnProfile && (
           <Link
@@ -161,6 +156,35 @@ export default function User({ userId, currentUserId }: UserProps) {
           </Link>
         )}
       </div>
+    </div>
+  );
+}
+
+type SkillListProps = {
+  title: string;
+  skillIds: string[];
+  getSkillLabel: (id: string) => string;
+  emptyText: string;
+};
+
+function SkillList({ title, skillIds, getSkillLabel, emptyText }: SkillListProps) {
+  return (
+    <div>
+      <h2 className="text-lg font-medium mb-2">{title}</h2>
+      {skillIds.length === 0 ? (
+        <p className="text-sm text-gray-500">{emptyText}</p>
+      ) : (
+        <ul className="flex flex-wrap gap-2">
+          {skillIds.map((id) => (
+            <li
+              key={id}
+              className="text-white bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"
+            >
+              {getSkillLabel(id)}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
