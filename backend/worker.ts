@@ -1,9 +1,9 @@
 import app from "@/firebase/auth";
-import { addEdge } from "@/firebase/utils";
+import { addEdge, deleteEdge } from "@/firebase/utils";
 import { Cycle } from "@/models/Cycle";
 import { Edge } from "@/models/Edge";
 import { Task } from "@/models/Task";
-import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 
 const DELAY = 2000;
 
@@ -108,7 +108,45 @@ async function processAdd(from: string, to: string, uid: string) {
     const cycleRef = await addDoc(collection(db, 'cycles'), cycle);
     // await updateDoc(doc(db, 'cycles', cycleRef.id), { cycleId: cycleRef.id });
     for (const uid of cycle.uids) {
+      console.log("updating user", uid, "with cycle", cycleRef.id);
       await updateDoc(doc(db, "users", uid), { cycles: arrayUnion(cycleRef.id) });
+    }
+  }
+}
+
+async function processRemove(edgeId: string) {
+  const db = getFirestore(app);
+
+  const edge = edges.get(edgeId);
+  if (!edge) {
+    console.error("edge not found", edgeId);
+    return;
+  }
+
+  const deleteRes = await deleteEdge(edgeId, edge.uid);
+  if (!deleteRes.ok) {
+    console.error("failed to delete edge", deleteRes.error);
+    return;
+  }
+
+  const cyclesRef = collection(db, 'cycles');
+  const cyclesSnapshot = await getDocs(query(cyclesRef, where('edgeIds', 'array-contains', edgeId)));
+
+  for (const cycleDoc of cyclesSnapshot.docs) {
+    const cycle = cycleDoc.data() as Cycle;
+    const uniqueUids = [...new Set(cycle.uids)];
+    for (const cycleUid of uniqueUids) {
+      await updateDoc(doc(db, "users", cycleUid), { cycles: arrayRemove(cycleDoc.id) });
+    }
+    await deleteDoc(doc(db, 'cycles', cycleDoc.id));
+  }
+
+  edges.delete(edgeId);
+  const fromEdges = nbs.get(edge.from);
+  if (fromEdges) {
+    const idx = fromEdges.indexOf(edgeId);
+    if (idx !== -1) {
+      fromEdges.splice(idx, 1);
     }
   }
 }
@@ -129,17 +167,18 @@ async function getAllEdgesFirebase() {
   }
 }
 
-async function addDummyTask(type: "add" | "remove", from: string, to: string, uid: string) {
+async function addDummyTask(type: "add" | "remove", from: string, to: string, uid: string, edgeId: string) {
   const db = getFirestore(app);
-  const task: Task = { type, from, to, uid };
+  const task: Task = { type, from, to, uid, edgeId };
   const taskRef = await addDoc(collection(db, 'queue'), task);
   console.log("added dummy task", taskRef.id);
 }
 
 async function main() {
-  await addDummyTask("add", "skill1", "skill2", "uid1");
-  await addDummyTask("add", "skill2", "skill3", "uid2");
-  await addDummyTask("add", "skill3", "skill1", "uid3");
+  await addDummyTask("add", "skill1", "skill2", "uid1", "");
+  await addDummyTask("add", "skill2", "skill3", "uid2", "");
+  await addDummyTask("add", "skill3", "skill1", "uid3", "");
+  // await addDummyTask("remove", "", "", "", "6gSmshduXRUQ5KvexTRG");
   await getAllEdgesFirebase();
   const db = getFirestore(app);
   while (true) {
@@ -156,10 +195,9 @@ async function main() {
     if (task.type === "add") {
       console.log("processing add");
       await processAdd(task.from, task.to, task.uid);
-      console.log(edges);
-      console.log(nbs);
     } else if (task.type === "remove") {
-      console.log("not implemented");
+      console.log("processing remove");
+      await processRemove(task.edgeId);
     }
     await deleteDoc(taskRef);
   }
