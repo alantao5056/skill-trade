@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { IoCheckmark, IoClose } from "react-icons/io5";
 import type { Cycle } from "@/models/Cycle";
 
 interface CycleListProps {
@@ -10,6 +11,7 @@ interface CycleListProps {
   skillMap: Record<string, string>;
   userMap: Record<string, string>;
   onAccept: (cycleId: string) => void;
+  onReject: (cycleId: string) => void;
 }
 
 function ApprovalChain({
@@ -70,6 +72,7 @@ export default function CycleList({
   skillMap,
   userMap,
   onAccept,
+  onReject,
 }: CycleListProps) {
   if (loading) {
     return <p className="text-[var(--color-text)]/60 text-sm">Loading cycles…</p>;
@@ -104,19 +107,30 @@ export default function CycleList({
               <SkillChain skillIds={c.skillIds} skillMap={skillMap} />
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             {c.approvals.some((a) => a.uid === currentUid && a.approved) ? (
               <span className="text-xs px-3 py-1 rounded-lg bg-gray-200 text-gray-400 cursor-default select-none">
                 Accepted
               </span>
             ) : (
-              <button
-                type="button"
-                onClick={() => onAccept(c.cycleId)}
-                className="btn-primary text-xs px-3 py-1 rounded-lg"
-              >
-                Accept
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => onAccept(c.cycleId)}
+                  className="btn-primary text-xs px-2 py-1 rounded-lg"
+                  aria-label="Accept"
+                >
+                  <IoCheckmark size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onReject(c.cycleId)}
+                  className="text-xs px-2 py-1 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                  aria-label="Deny"
+                >
+                  <IoClose size={18} />
+                </button>
+              </>
             )}
           </div>
         </li>

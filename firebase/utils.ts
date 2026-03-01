@@ -151,6 +151,29 @@ export async function approveCycle(cycleId: string, uid: string): Promise<Res> {
   }
 }
 
+export async function rejectCycle(cycleId: string, uid: string): Promise<Res> {
+  const db = getFirestore(app);
+  try {
+    const cycleRef = doc(db, 'cycles', cycleId);
+    const cycleSnap = await getDoc(cycleRef);
+    if (!cycleSnap.exists()) {
+      return { ok: false, data: null, error: "Cycle not found" };
+    }
+    const cycle = cycleSnap.data() as Cycle;
+    const updatedApprovals = cycle.approvals.map((a) =>
+      a.uid === uid ? { ...a, approved: false } : a
+    );
+    await updateDoc(cycleRef, { approvals: updatedApprovals });
+    return {
+      ok: true,
+      data: { ...cycle, cycleId, approvals: updatedApprovals } as Cycle,
+      error: "",
+    };
+  } catch (err) {
+    return { ok: false, data: null, error: "Failed to reject cycle" };
+  }
+}
+
 export async function enqueueAddEdge(from: string, to: string, uid: string): Promise<Res> {
   const db = getFirestore(app);
   try {

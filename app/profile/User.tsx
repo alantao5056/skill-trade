@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { VscEdit } from "react-icons/vsc";
+import { IoClose, IoCheckmark } from "react-icons/io5";
 import { useUser } from "@/context/UserContext";
 import { getUser, getSkills, updateUserProfile } from "@/firebase/utils";
 import type { User as UserModel } from "@/models/User";
@@ -122,16 +123,18 @@ export default function User({ userId }: UserProps) {
               <button
                 type="button"
                 onClick={handleSaveName}
-                className="text-sm text-[var(--color-primary)] hover:underline"
+                className="text-[var(--color-primary)] hover:opacity-80 p-1 rounded"
+                aria-label="Save"
               >
-                Save
+                <IoCheckmark size={18} />
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditingName(false)}
-                className="text-sm text-gray-500 hover:underline"
+                className="text-gray-500 hover:opacity-80 p-1 rounded"
+                aria-label="Cancel"
               >
-                Cancel
+                <IoClose size={18} />
               </button>
             </div>
           ) : (
@@ -166,16 +169,14 @@ export default function User({ userId }: UserProps) {
         />
 
         {isOwnProfile && (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center gap-4 mt-4">
             <Link
               href="/meetings"
-              className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:opacity-90"
+              className="btn-primary text-sm px-4 py-2 rounded-lg inline-block"
             >
-              My meetings
+              My Meetings
             </Link>
-            <div className="mt-4">
-              <SignOutButton />
-            </div>
+            <SignOutButton />
           </div>
         )}
         </div>

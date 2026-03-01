@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { IoAdd } from "react-icons/io5";
 import { getSkills } from "@/firebase/utils";
 import type { Skill } from "@/models/Skill";
 
@@ -85,8 +86,8 @@ export default function TradeForm({
         </select>
       </label>
 
-      <button type="submit" className="btn-primary text-sm">
-        Add trade
+      <button type="submit" className="btn-primary text-sm p-2 rounded-lg" aria-label="Add trade">
+        <IoAdd size={20} />
       </button>
     </form>
   );
