@@ -171,13 +171,14 @@ export default function User({ userId }: UserProps) {
         />
 
         {isOwnProfile && (
-          <div className="flex flex-col items-center gap-4 mt-4">
+          <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-[11rem]">
             <Link
               href="/meetings"
-              className="btn-primary text-sm px-4 py-2 rounded-lg inline-block"            >
+              className="btn-primary text-sm px-4 py-2 rounded-lg inline-block w-full text-center"
+            >
               My Meetings
             </Link>
-            <SignOutButton />
+            <SignOutButton className="w-full" />
           </div>
         )}
         </div>
