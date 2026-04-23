@@ -3,13 +3,15 @@
 <img width="3020" height="1592" alt="image" src="https://github.com/user-attachments/assets/fb643165-de7e-4559-a4e6-0065f80aa702" />
 
 ## About
-SkillTrade is a project made at MIT Blueprint 2026, a 9-hour high school hackathon organized by HackMIT. 
+SkillTrade is a project made at MIT Blueprint 2026, a 9-hour high school hackathon organized by HackMIT. Made by Alan Tao, Heona Liu, and Ryan Lee.
 
 ## Inspiration
 
 Ryan is bad at Valorant. Like, really bad. He’s watched countless YouTube tutorials and asked his friends for tips, all to no avail. He would hire a coach, but he’s a broke, jobless high school student. He needs a coach who needs a coach, just in something else like math, which Ryan IS good at. Then he realized how many of his peers were in a similar situation and, voila, the concept for SkillTrade was born.
 
 The inspiration for this project’s algorithm also came from Alan’s love for algorithms and competitive programming. One particular algorithm is called depth-first search, which can be used to find cycles in a graph. Using this, we built a website that applies the concept to match skill trades between different users. 
+
+Heona also enjoys diving deeper into web development and creating intuitive UI to help users understand. Taking the cycles found, and producing it into a visual that is easily interpretable was another reason we chose to create this application.
 
 ## What it does
 
@@ -25,7 +27,7 @@ We used ChatGPT for external debugging, as well as Cursor to assist in building 
 
 ## Individual Contributions
 
-Ryan worked primarily with Heona on frontend and UI/UX design (specifically, the Landing and Dashboard pages). Additionally, they managed to implement component functionality before combining with the backend data. Alan was responsible for designing the database structure and writing the backend code. He also created the basic project structure and set up Firebase. 
+Ryan worked primarily with Heona on frontend and UI/UX design (specifically, the Landing and Dashboard pages along with presentation). Additionally, they managed to implement component functionality before combining with the backend data. Alan was responsible for designing the database structure and writing the backend code. He also created the basic project structure and set up Firebase. 
 
 ## Challenges we ran into
 
